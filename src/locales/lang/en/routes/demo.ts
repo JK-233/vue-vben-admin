@@ -45,6 +45,7 @@ export default {
 
     time: 'Relative Time',
     cropperImage: 'Cropper Image',
+    cardList: 'Card List',
   },
   editor: {
     editor: 'Editor',
@@ -66,6 +67,7 @@ export default {
     feat: 'Page Function',
     icon: 'Icon',
     tabs: 'Tabs',
+    tabDetail: 'Tab Detail',
     sessionTimeout: 'Session Timeout',
     print: 'Print',
     contextMenu: 'Context Menu',
@@ -81,6 +83,9 @@ export default {
     tab: 'Tab with parameters',
     tab1: 'Tab with parameter 1',
     tab2: 'Tab with parameter 2',
+    menu: 'Menu with parameters',
+    menu1: 'Menu with parameters 1',
+    menu2: 'Menu with parameters 2',
 
     ws: 'Websocket test',
 
@@ -190,5 +195,6 @@ export default {
     editCellTable: 'Editable cell',
     editRowTable: 'Editable row',
     authColumn: 'Auth column',
+    resizeParentHeightTable: 'resizeParentHeightTable',
   },
 };

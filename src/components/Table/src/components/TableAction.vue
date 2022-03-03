@@ -1,20 +1,20 @@
 <template>
   <div :class="[prefixCls, getAlign]" @click="onCellClick">
     <template v-for="(action, index) in getActions" :key="`${index}-${action.label}`">
-      <Tooltip v-bind="getTooltip(action.tooltip)">
+      <Tooltip v-if="action.tooltip" v-bind="getTooltip(action.tooltip)">
         <PopConfirmButton v-bind="action">
-          <Icon :icon="action.icon" class="mr-1" v-if="action.icon" />
-          {{ action.label }}
+          <Icon :icon="action.icon" :class="{ 'mr-1': !!action.label }" v-if="action.icon" />
+          <template v-if="action.label">{{ action.label }}</template>
         </PopConfirmButton>
       </Tooltip>
+      <PopConfirmButton v-else v-bind="action">
+        <Icon :icon="action.icon" :class="{ 'mr-1': !!action.label }" v-if="action.icon" />
+        <template v-if="action.label">{{ action.label }}</template>
+      </PopConfirmButton>
       <Divider
         type="vertical"
         class="action-divider"
-        v-if="
-          divider &&
-          index < getActions.length - (dropDownActions ? 0 : 1) &&
-          getDropdownList.length > 0
-        "
+        v-if="divider && index < getActions.length - 1"
       />
     </template>
     <Dropdown
@@ -31,7 +31,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, computed, toRaw } from 'vue';
+  import { defineComponent, PropType, computed, toRaw, unref } from 'vue';
   import { MoreOutlined } from '@ant-design/icons-vue';
   import { Divider, Tooltip, TooltipProps } from 'ant-design-vue';
   import Icon from '/@/components/Icon/index';
@@ -91,6 +91,7 @@
           .map((action) => {
             const { popConfirm } = action;
             return {
+              getPopupContainer: () => unref((table as any)?.wrapRef.value) ?? document.body,
               type: 'link',
               size: 'small',
               ...action,
@@ -102,22 +103,21 @@
           });
       });
 
-      const getDropdownList = computed(() => {
-        return (toRaw(props.dropDownActions) || [])
-          .filter((action) => {
-            return hasPermission(action.auth) && isIfShow(action);
-          })
-          .map((action, index) => {
-            const { label, popConfirm } = action;
-            return {
-              ...action,
-              ...popConfirm,
-              onConfirm: popConfirm?.confirm,
-              onCancel: popConfirm?.cancel,
-              text: label,
-              divider: index < props.dropDownActions.length - 1 ? props.divider : false,
-            };
-          });
+      const getDropdownList = computed((): any[] => {
+        const list = (toRaw(props.dropDownActions) || []).filter((action) => {
+          return hasPermission(action.auth) && isIfShow(action);
+        });
+        return list.map((action, index) => {
+          const { label, popConfirm } = action;
+          return {
+            ...action,
+            ...popConfirm,
+            onConfirm: popConfirm?.confirm,
+            onCancel: popConfirm?.cancel,
+            text: label,
+            divider: index < list.length - 1 ? props.divider : false,
+          };
+        });
       });
 
       const getAlign = computed(() => {
@@ -126,22 +126,21 @@
         return actionColumn?.align ?? 'left';
       });
 
-      const getTooltip = computed(() => {
-        return (data: string | TooltipProps): TooltipProps => {
-          if (isString(data)) {
-            return { title: data, placement: 'bottom' };
-          } else {
-            return Object.assign({ placement: 'bottom' }, data);
-          }
+      function getTooltip(data: string | TooltipProps): TooltipProps {
+        return {
+          getPopupContainer: () => unref((table as any)?.wrapRef.value) ?? document.body,
+          placement: 'bottom',
+          ...(isString(data) ? { title: data } : data),
         };
-      });
+      }
 
       function onCellClick(e: MouseEvent) {
         if (!props.stopButtonPropagation) return;
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'BUTTON') {
-          e.stopPropagation();
-        }
+        const path = e.composedPath() as HTMLElement[];
+        const isInButton = path.find((ele) => {
+          return ele.tagName?.toUpperCase() === 'BUTTON';
+        });
+        isInButton && e.stopPropagation();
       }
 
       return { prefixCls, getActions, getDropdownList, getAlign, onCellClick, getTooltip };
@@ -177,6 +176,12 @@
 
       span {
         margin-left: 0 !important;
+      }
+    }
+
+    button.ant-btn-circle {
+      span {
+        margin: auto !important;
       }
     }
 

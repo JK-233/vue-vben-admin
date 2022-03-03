@@ -18,9 +18,9 @@
     </template>
 
     <template #footer v-if="!$slots.footer">
-      <ModalFooter v-bind="getProps" @ok="handleOk" @cancel="handleCancel">
+      <ModalFooter v-bind="getBindValue" @ok="handleOk" @cancel="handleCancel">
         <template #[item]="data" v-for="item in Object.keys($slots)">
-          <slot :name="item" v-bind="data"></slot>
+          <slot :name="item" v-bind="data || {}"></slot>
         </template>
       </ModalFooter>
     </template>
@@ -44,7 +44,7 @@
     </ModalWrapper>
 
     <template #[item]="data" v-for="item in Object.keys(omit($slots, 'default'))">
-      <slot :name="item" v-bind="data"></slot>
+      <slot :name="item" v-bind="data || {}"></slot>
     </template>
   </Modal>
 </template>
@@ -72,6 +72,7 @@
   import { basicProps } from './props';
   import { useFullScreen } from './hooks/useModalFullScreen';
   import { omit } from 'lodash-es';
+  import { useDesign } from '/@/hooks/web/useDesign';
 
   export default defineComponent({
     name: 'BasicModal',
@@ -82,7 +83,8 @@
     setup(props, { emit, attrs }) {
       const visibleRef = ref(false);
       const propsRef = ref<Partial<ModalProps> | null>(null);
-      const modalWrapperRef = ref<ComponentRef>(null);
+      const modalWrapperRef = ref<any>(null);
+      const { prefixCls } = useDesign('basic-modal');
 
       // modal   Bottom and top height
       const extHeightRef = ref(0);
@@ -104,7 +106,7 @@
       }
 
       // Custom title component: get title
-      const getMergeProps = computed((): ModalProps => {
+      const getMergeProps = computed((): Recordable => {
         return {
           ...props,
           ...(unref(propsRef) as any),
@@ -118,7 +120,7 @@
       });
 
       // modal component does not need title and origin buttons
-      const getProps = computed((): ModalProps => {
+      const getProps = computed((): Recordable => {
         const opt = {
           ...unref(getMergeProps),
           visible: unref(visibleRef),
@@ -133,11 +135,16 @@
       });
 
       const getBindValue = computed((): Recordable => {
-        const attr = { ...attrs, ...unref(getProps) };
+        const attr = {
+          ...attrs,
+          ...unref(getMergeProps),
+          visible: unref(visibleRef),
+          wrapClassName: unref(getWrapClassName),
+        };
         if (unref(fullScreenRef)) {
-          return omit(attr, 'height');
+          return omit(attr, ['height', 'title']);
         }
-        return attr;
+        return omit(attr, 'title');
       });
 
       const getWrapperHeight = computed(() => {
@@ -164,13 +171,14 @@
         },
         {
           immediate: false,
-        }
+        },
       );
 
       // 取消事件
       async function handleCancel(e: Event) {
         e?.stopPropagation();
-
+        // 过滤自定义关闭按钮的空白区域
+        if ((e.target as HTMLElement)?.classList?.contains(prefixCls + '-close--custom')) return;
         if (props.closeFunc && isFunction(props.closeFunc)) {
           const isClose: boolean = await props.closeFunc();
           visibleRef.value = !isClose;
@@ -207,7 +215,7 @@
         extHeightRef.value = height;
       }
 
-      function handleTitleDbClick(e: ChangeEvent) {
+      function handleTitleDbClick(e) {
         if (!props.canFullscreen) return;
         e.stopPropagation();
         handleFullScreen(e);

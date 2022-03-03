@@ -2,7 +2,7 @@
   <BasicModal
     width="800px"
     :title="t('component.upload.preview')"
-    wrapClassName="upload-preview-modal"
+    class="upload-preview-modal"
     v-bind="$attrs"
     @register="register"
     :showOkBtn="false"
@@ -20,6 +20,7 @@
   import { downloadByUrl } from '/@/utils/file/download';
   import { createPreviewColumns, createPreviewActionColumn } from './data';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { isArray } from '/@/utils/is';
 
   export default defineComponent({
     components: { BasicModal, FileList },
@@ -33,6 +34,7 @@
       watch(
         () => props.value,
         (value) => {
+          if (!isArray(value)) value = [];
           fileListRef.value = value
             .filter((item) => !!item)
             .map((item) => {
@@ -43,7 +45,7 @@
               };
             });
         },
-        { immediate: true }
+        { immediate: true },
       );
 
       // 删除
@@ -54,7 +56,7 @@
           emit('delete', removed[0].url);
           emit(
             'list-change',
-            fileListRef.value.map((item) => item.url)
+            fileListRef.value.map((item) => item.url),
           );
         }
       }
@@ -78,8 +80,8 @@
         register,
         closeModal,
         fileListRef,
-        columns: createPreviewColumns(),
-        actionColumn: createPreviewActionColumn({ handleRemove, handleDownload }),
+        columns: createPreviewColumns() as any[],
+        actionColumn: createPreviewActionColumn({ handleRemove, handleDownload }) as any,
       };
     },
   });

@@ -53,7 +53,22 @@ const feat: AppRouteModule = {
       component: () => import('/@/views/demo/feat/tabs/index.vue'),
       meta: {
         title: t('routes.demo.feat.tabs'),
+        hideChildrenInMenu: true,
       },
+      children: [
+        {
+          path: 'detail/:id',
+          name: 'TabDetail',
+          component: () => import('/@/views/demo/feat/tabs/TabDetail.vue'),
+          meta: {
+            currentActiveMenu: '/feat/tabs',
+            title: t('routes.demo.feat.tabDetail'),
+            hideMenu: true,
+            dynamicLevel: 3,
+            realPath: '/feat/tabs/detail',
+          },
+        },
+      ],
     },
     {
       path: 'breadcrumb',
@@ -181,7 +196,7 @@ const feat: AppRouteModule = {
       },
     },
     {
-      path: 'error-log',
+      path: '/error-log',
       name: 'ErrorLog',
       component: () => import('/@/views/sys/error-log/index.vue'),
       meta: {
@@ -261,6 +276,35 @@ const feat: AppRouteModule = {
             title: t('routes.demo.feat.tab2'),
             carryParam: true,
             ignoreRoute: true,
+          },
+        },
+      ],
+    },
+    {
+      path: 'testParam/:id',
+      name: 'TestParam',
+      component: getParentLayout('TestParam'),
+      meta: {
+        title: t('routes.demo.feat.menu'),
+        ignoreKeepAlive: true,
+      },
+      children: [
+        {
+          path: 'sub1',
+          name: 'TestParam_1',
+          component: () => import('/@/views/demo/feat/menu-params/index.vue'),
+          meta: {
+            title: t('routes.demo.feat.menu1'),
+            ignoreKeepAlive: true,
+          },
+        },
+        {
+          path: 'sub2',
+          name: 'TestParam_2',
+          component: () => import('/@/views/demo/feat/menu-params/index.vue'),
+          meta: {
+            title: t('routes.demo.feat.menu2'),
+            ignoreKeepAlive: true,
           },
         },
       ],

@@ -26,14 +26,15 @@ export function useFormValues({
     for (const item of Object.entries(values)) {
       let [, value] = item;
       const [key] = item;
-      if ((isArray(value) && value.length === 0) || isFunction(value)) {
+      if (!key || (isArray(value) && value.length === 0) || isFunction(value)) {
         continue;
       }
       const transformDateFunc = unref(getProps).transformDateFunc;
       if (isObject(value)) {
         value = transformDateFunc?.(value);
       }
-      if (isArray(value) && value[0]?._isAMomentObject && value[1]?._isAMomentObject) {
+
+      if (isArray(value) && value[0]?.format && value[1]?.format) {
         value = value.map((item) => transformDateFunc?.(item));
       }
       // Remove spaces

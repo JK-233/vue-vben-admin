@@ -25,6 +25,7 @@ module.exports = defineConfig({
     'plugin:jest/recommended',
   ],
   rules: {
+    'vue/script-setup-uses-vars': 'error',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -61,6 +62,7 @@ module.exports = defineConfig({
     'vue/singleline-html-element-content-newline': 'off',
     'vue/attribute-hyphenation': 'off',
     'vue/require-default-prop': 'off',
+    'vue/require-explicit-emits': 'off',
     'vue/html-self-closing': [
       'error',
       {
@@ -73,5 +75,6 @@ module.exports = defineConfig({
         math: 'always',
       },
     ],
+    'vue/multi-word-component-names': 'off',
   },
 });
